@@ -1,15 +1,20 @@
+# original version
 # SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
 # SPDX-FileCopyrightText: Copyright (c) 2021 ladyada for Adafruit Industries
 #
 # SPDX-License-Identifier: MIT
+#
+# this version: also Copyright (c) 2022 peter-l5
+# build version: v005
+
 """
-`adafruit_scd4x`
+`micropython_scd4x`
 ================================================================================
 
 Driver for Sensirion SCD4X CO2 sensor
 
 
-* Author(s): ladyada
+* Author(s): ladyada, peter-l5
 
 Implementation Notes
 --------------------
@@ -18,27 +23,19 @@ Implementation Notes
 
 * `Adafruit SCD4X breakout board <https://www.adafruit.com/product/5187>`_
 
-**Software and Dependencies:**
-
-* Adafruit CircuitPython firmware for the supported boards:
-  https://github.com/adafruit/circuitpython/releases
-
-* Adafruit's Bus Device library: https://github.com/adafruit/Adafruit_CircuitPython_BusDevice
+** Documentation **
+* The library is dervived from the adafruit CircuitPython version.
+* The adafruit version and documentation can be found at
+* https://github.com/adafruit/Adafruit_CircuitPython_SCD4X.git
 """
 
 import time
-import struct
-from adafruit_bus_device import i2c_device
+# import struct
+# from adafruit_bus_device import i2c_device
+from machine import I2C
 from micropython import const
 
-try:
-    from typing import Tuple, Union
-    from busio import I2C
-except ImportError:
-    pass
-
-__version__ = "0.0.0+auto.0"
-__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_SCD4X.git"
+__repo__ = "https://github.com/peter-l5/MicroPython_SCD4X"
 
 SCD4X_DEFAULT_ADDR = 0x62
 _SCD4X_REINIT = const(0x3646)
@@ -61,11 +58,11 @@ _SCD4X_GETASCE = const(0x2313)
 _SCD4X_SETASCE = const(0x2416)
 
 
-class SCD4X:
+class SCD4X():
     """
-    CircuitPython helper class for using the SCD4X CO2 sensor
+    MicroPython helper class for using the SCD4X CO2 sensor
 
-    :param ~busio.I2C i2c_bus: The I2C bus the SCD4X is connected to.
+    :param ~machine.I2C i2c_bus: The I2C bus the SCD4X is connected to.
     :param int address: The I2C device address for the sensor. Default is :const:`0x62`
 
     **Quickstart: Importing and using the SCD4X**
@@ -75,16 +72,15 @@ class SCD4X:
 
         .. code-block:: python
 
-            import board
             import adafruit_scd4x
 
         Once this is done you can define your `board.I2C` object and define your sensor object
 
         .. code-block:: python
 
-            i2c = board.I2C()   # uses board.SCL and board.SDA
-            scd = adafruit_scd4x.SCD4X(i2c)
-            scd.start_periodic_measurement()
+            i2c = machine.I2C(0, sda=Pin(2), scl=Pin(3), freq=100000)   # RaspberryPi pico example
+            scd = scd4x.SCD4X(i2c)
+            scd.start_periodic_measurement()  # start_low_periodic_measurement() is a lower power alternative 
 
         Now you have access to the CO2, temperature and humidity using
         the :attr:`CO2`, :attr:`temperature` and :attr:`relative_humidity` attributes
@@ -99,7 +95,12 @@ class SCD4X:
     """
 
     def __init__(self, i2c_bus: I2C, address: int = SCD4X_DEFAULT_ADDR) -> None:
-        self.i2c_device = i2c_device.I2CDevice(i2c_bus, address)
+        print("__init__ :", dir() )
+        print(address)
+        print("i2c_bus : ",i2c_bus)
+        self.address = address
+        print(i2c_bus)
+        self.i2c_device = i2c_bus
         self._buffer = bytearray(18)
         self._cmd = bytearray(2)
         self._crc_buffer = bytearray(2)
@@ -327,8 +328,7 @@ class SCD4X:
         self._cmd[1] = cmd & 0xFF
 
         try:
-            with self.i2c_device as i2c:
-                i2c.write(self._cmd, end=2)
+            self.i2c_device.writeto(self.address, self._cmd)
         except OSError as err:
             raise RuntimeError(
                 "Could not communicate via I2C, some commands/settings "
@@ -342,13 +342,11 @@ class SCD4X:
         self._crc_buffer[0] = self._buffer[2] = (value >> 8) & 0xFF
         self._crc_buffer[1] = self._buffer[3] = value & 0xFF
         self._buffer[4] = self._crc8(self._crc_buffer)
-        with self.i2c_device as i2c:
-            i2c.write(self._buffer, end=5)
+        self.i2c_device.i2c.write(self.address, self._buffer)
         time.sleep(cmd_delay)
 
     def _read_reply(self, buff, num):
-        with self.i2c_device as i2c:
-            i2c.readinto(buff, end=num)
+        self.i2c_device.readfrom_into(self.address, buff)
         self._check_buffer_crc(self._buffer[0:num])
 
     @staticmethod
