@@ -9,4 +9,4 @@ The `scd4x.py` module provides a helper class `SCD4X()` that enables I2C interac
 
 Details of the adafruit breakout board for the sensor and the methods provided by the `SCD4X()` class.
 
-Note that the SCD41 sensor provides additional low power/ low sampling rate commands that are not implemented in this driver. See the Sensirion datasheet for the sensors for details.
+The SCD41 sensor provides additional low power/ lower sampling rate commands that are not implemented in this driver. See the Sensirion datasheet for the sensors for details.
