@@ -4,8 +4,8 @@
 #
 # SPDX-License-Identifier: MIT
 #
-# this version: also Copyright (c) 2022 peter-l5
-# build version: v005
+# this version: also Copyright (c) 2022-2023 peter-l5
+# build version: v101
 
 """
 `micropython_scd4x`
@@ -30,11 +30,10 @@ Implementation Notes
 """
 
 import time
-# import struct
-# from adafruit_bus_device import i2c_device
 from machine import I2C
 from micropython import const
 
+__version__ = "v101"
 __repo__ = "https://github.com/peter-l5/MicroPython_SCD4X"
 
 SCD4X_DEFAULT_ADDR = 0x62
@@ -58,7 +57,7 @@ _SCD4X_GETASCE = const(0x2313)
 _SCD4X_SETASCE = const(0x2416)
 
 
-class SCD4X():
+class SCD4X:
     """
     MicroPython helper class for using the SCD4X CO2 sensor
 
@@ -72,7 +71,7 @@ class SCD4X():
 
         .. code-block:: python
 
-            import adafruit_scd4x
+            import scd4x
 
         Once this is done you can define your `board.I2C` object and define your sensor object
 
@@ -80,7 +79,7 @@ class SCD4X():
 
             i2c = machine.I2C(0, sda=Pin(2), scl=Pin(3), freq=100000)   # RaspberryPi pico example
             scd = scd4x.SCD4X(i2c)
-            scd.start_periodic_measurement()  # start_low_periodic_measurement() is a lower power alternative 
+            scd.start_periodic_measurement()  # start_low_periodic_measurement() is a lower power alternative
 
         Now you have access to the CO2, temperature and humidity using
         the :attr:`CO2`, :attr:`temperature` and :attr:`relative_humidity` attributes
@@ -95,9 +94,9 @@ class SCD4X():
     """
 
     def __init__(self, i2c_bus: I2C, address: int = SCD4X_DEFAULT_ADDR) -> None:
-        print("__init__ :", dir() )
-        print(address)
-        print("i2c_bus : ",i2c_bus)
+        print("__init__ :", dir())
+        print("address : %x" % address)
+        print("i2c_bus : ", i2c_bus)
         self.address = address
         print(i2c_bus)
         self.i2c_device = i2c_bus
@@ -240,22 +239,22 @@ class SCD4X():
         .. note::
             Only the following commands will work once in working mode:
 
-            * :attr:`CO2 <adafruit_scd4x.SCD4X.CO2>`
-            * :attr:`temperature <adafruit_scd4x.SCD4X.temperature>`
-            * :attr:`relative_humidity <adafruit_scd4x.SCD4X.relative_humidity>`
-            * :meth:`data_ready() <adafruit_scd4x.SCD4x.data_ready>`
-            * :meth:`reinit() <adafruit_scd4x.SCD4X.reinit>`
-            * :meth:`factory_reset() <adafruit_scd4x.SCD4X.factory_reset>`
-            * :meth:`force_calibration() <adafruit_scd4x.SCD4X.force_calibration>`
-            * :meth:`self_test() <adafruit_scd4x.SCD4X.self_test>`
-            * :meth:`set_ambient_pressure() <adafruit_scd4x.SCD4X.set_ambient_pressure>`
+            * :attr:`CO2 <scd4x.SCD4X.CO2>`
+            * :attr:`temperature <scd4x.SCD4X.temperature>`
+            * :attr:`relative_humidity <scd4x.SCD4X.relative_humidity>`
+            * :meth:`data_ready() <scd4x.SCD4x.data_ready>`
+            * :meth:`reinit() <scd4x.SCD4X.reinit>`
+            * :meth:`factory_reset() <scd4x.SCD4X.factory_reset>`
+            * :meth:`force_calibration() <scd4x.SCD4X.force_calibration>`
+            * :meth:`self_test() <scd4x.SCD4X.self_test>`
+            * :meth:`set_ambient_pressure() <scd4x.SCD4X.set_ambient_pressure>`
 
         """
         self._send_command(_SCD4X_STARTPERIODICMEASUREMENT)
 
     def start_low_periodic_measurement(self) -> None:
         """Put sensor into low power working mode, about 30s per measurement. See
-        :meth:`start_periodic_measurement() <adafruit_scd4x.SCD4X.start_perodic_measurement>`
+        :meth:`start_periodic_measurement() <scd4x.SCD4X.start_perodic_measurement>`
         for more details.
         """
         self._send_command(_SCD4X_STARTLOWPOWERPERIODICMEASUREMENT)
