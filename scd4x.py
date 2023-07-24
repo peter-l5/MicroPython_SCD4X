@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: MIT
 #
 # this version: also Copyright (c) 2022-2023 peter-l5
-# build version: v101
+# build version: v102
 
 """
 `micropython_scd4x`
@@ -33,7 +33,7 @@ import time
 from machine import I2C
 from micropython import const
 
-__version__ = "v101"
+__version__ = "v102"
 __repo__ = "https://github.com/peter-l5/MicroPython_SCD4X"
 
 SCD4X_DEFAULT_ADDR = 0x62
@@ -296,7 +296,7 @@ class SCD4X:
 
     @property
     def altitude(self) -> int:
-        """Specifies the altitude at the measurement location in meters above sea level. Setting
+        """Specifies the altitude at the measurement location in metres above sea level. Setting
         this value adjusts the CO2 measurement calculations to account for the air pressure's effect
         on readings.
 
@@ -311,7 +311,7 @@ class SCD4X:
     @altitude.setter
     def altitude(self, height: int) -> None:
         if height > 65535:
-            raise AttributeError("Height must be less than or equal to 65535 meters")
+            raise AttributeError("Height must be less than or equal to 65535 metres")
         self._set_command_value(_SCD4X_SETALTITUDE, height)
 
     def _check_buffer_crc(self, buf: bytearray) -> bool:
@@ -341,7 +341,7 @@ class SCD4X:
         self._crc_buffer[0] = self._buffer[2] = (value >> 8) & 0xFF
         self._crc_buffer[1] = self._buffer[3] = value & 0xFF
         self._buffer[4] = self._crc8(self._crc_buffer)
-        self.i2c_device.i2c.write(self.address, self._buffer)
+        self.i2c_device.writeto(self.address, self._buffer[:5])
         time.sleep(cmd_delay)
 
     def _read_reply(self, buff, num):
