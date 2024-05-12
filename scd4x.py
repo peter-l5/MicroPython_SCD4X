@@ -4,8 +4,8 @@
 #
 # SPDX-License-Identifier: MIT
 #
-# this version: also Copyright (c) 2022-2023 peter-l5
-# build version: v102
+# this version: also Copyright (c) 2022-2024 peter-l5
+# build version: v103
 
 """
 `micropython_scd4x`
@@ -32,8 +32,9 @@ Implementation Notes
 import time
 from machine import I2C
 from micropython import const
+import struct
 
-__version__ = "v102"
+__version__ = "v103"
 __repo__ = "https://github.com/peter-l5/MicroPython_SCD4X"
 
 SCD4X_DEFAULT_ADDR = 0x62
