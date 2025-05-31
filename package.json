@@ -1,6 +1,6 @@
 {
   "urls": [
-    ["scd4x.py", "github:agners/MicroPython_SCD4X/scd4x.py"]
+    ["scd4x.py", "github:peter-l5/MicroPython_SCD4X/scd4x.py"]
   ],
   "version": "1.0.0",
   "deps": []
