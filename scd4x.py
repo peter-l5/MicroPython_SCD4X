@@ -34,7 +34,7 @@ from machine import I2C
 from micropython import const
 import struct
 
-__version__ = "v103"
+__version__ = "v104"
 __repo__ = "https://github.com/peter-l5/MicroPython_SCD4X"
 
 SCD4X_DEFAULT_ADDR = 0x62
