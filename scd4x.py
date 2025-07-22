@@ -109,6 +109,8 @@ class SCD4X:
         self._temperature = None
         self._relative_humidity = None
         self._co2 = None
+        self._acs_update_count = None
+        self._acs_last_correction = None
 
         self.stop_periodic_measurement()
 
@@ -147,6 +149,30 @@ class SCD4X:
         if self.data_ready:
             self._read_data()
         return self._relative_humidity
+
+    @property
+    def acs_update_count(self) -> int:
+        """Returns the current ACS update count
+
+        .. note::
+            Between measurements, the most recent reading will be cached and returned.
+
+        """
+        if self.data_ready:
+            self._read_data()
+        return self._acs_update_count
+    
+    @property
+    def acs_last_correction(self) -> int:
+        """Returns the current temperature in degrees Celsius
+
+        .. note::
+            Between measurements, the most recent reading will be cached and returned.
+
+        """
+        if self.data_ready:
+            self._read_data()
+        return self._acs_last_correction
 
     def reinit(self) -> None:
         """Reinitializes the sensor by reloading user settings from EEPROM."""
@@ -202,12 +228,15 @@ class SCD4X:
     def _read_data(self) -> None:
         """Reads the temp/hum/co2 from the sensor and caches it"""
         self._send_command(_SCD4X_READMEASUREMENT, cmd_delay=0.001)
-        self._read_reply(self._buffer, 9)
+        self._read_reply(self._buffer, 18)
         self._co2 = (self._buffer[0] << 8) | self._buffer[1]
         temp = (self._buffer[3] << 8) | self._buffer[4]
         self._temperature = -45 + 175 * (temp / 2**16)
         humi = (self._buffer[6] << 8) | self._buffer[7]
         self._relative_humidity = 100 * (humi / 2**16)
+        self._acs_update_count = (self._buffer[12] << 8) | self._buffer[13]
+        last_corr = (self._buffer[15] << 8) | self._buffer[16]
+        self._acs_last_correction = last_corr - 32768
 
     @property
     def data_ready(self) -> bool:
